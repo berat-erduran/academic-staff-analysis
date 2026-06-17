@@ -1,0 +1,86 @@
+import matplotlib.pyplot as plt
+
+unvanlar = [
+    "Profesör",
+    "Doçent",
+    "Doktor Öğretim\nÜyesi",
+    "Öğretim\nGörevlisi",
+    "Araştırma\nGörevlisi"
+]
+
+legend_unvanlar = [
+    "Profesör",
+    "Doçent",
+    "Doktor Öğretim Üyesi",
+    "Öğretim Görevlisi",
+    "Araştırma Görevlisi"
+]
+
+sayilar = [197, 245, 188, 184, 149]
+renkler = ["#ff7f0e", "#1f77b4", "#2ca02c", "#d62728", "#9467bd"]
+
+toplam = sum(sayilar)
+
+legend_yazi = [
+    f"{legend_unvanlar[i]} — {sayilar[i]} kişi (%{sayilar[i]/toplam*100:.1f})"
+    for i in range(len(legend_unvanlar))
+]
+
+plt.figure(figsize=(14, 9))
+
+wedges, texts, autotexts = plt.pie(
+    sayilar,
+    labels=unvanlar,
+    colors=renkler,
+    autopct="%1.1f%%",
+    startangle=90,
+    counterclock=False,
+    labeldistance=1.13,
+    pctdistance=0.72,
+    wedgeprops=dict(width=0.42, edgecolor="white"),
+    textprops=dict(color="black", fontsize=12, fontweight="bold")
+)
+
+for autotext in autotexts:
+    autotext.set_fontsize(11)
+    autotext.set_fontweight("bold")
+    autotext.set_color("black")
+
+plt.text(
+    0, 0,
+    "Unvan\nDağılımı",
+    ha="center",
+    va="center",
+    fontsize=18,
+    fontweight="bold",
+    color="gray"
+)
+
+plt.title(
+    "Aksaray Üniversitesi Akademik Personel Unvan Dağılımı",
+    fontsize=20,
+    fontweight="bold",
+    pad=25
+)
+
+plt.legend(
+    wedges,
+    legend_yazi,
+    title="Unvanlar",
+    loc="center left",
+    bbox_to_anchor=(1.05, 0.5),
+    fontsize=11,
+    title_fontsize=12,
+    frameon=True
+)
+
+plt.axis("equal")
+plt.tight_layout()
+
+plt.savefig(
+    "akademik_personel_unvan_dagilimi.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()

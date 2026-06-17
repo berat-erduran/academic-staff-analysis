@@ -1,0 +1,81 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import re, os, glob
+import matplotlib.image as mpimg
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+
+# Exceli bul
+excel_files = [f for f in os.listdir("/content") if f.endswith(".xlsx")]
+
+if not excel_files:
+    raise FileNotFoundError(
+        "`/content` dizininde hiç `.xlsx` dosyası bulunamadı. "
+        "Lütfen `YOKAKADEMIK.veri.seti (1).xlsx` dosyasını yeniden yüklediğinizden emin olun."
+    )
+
+excel_dosya = excel_files[0]
+df = pd.read_excel(os.path.join("/content", excel_dosya), sheet_name="Sheet1")
+df.columns = df.columns.str.strip()
+
+sutun = "lisans anadal"
+
+df_lisans = df[df[sutun].notna()].copy()
+df_lisans[sutun] = df_lisans[sutun].astype(str).str.strip()
+
+def universite_ayikla(metin):
+    metin = str(metin).upper().replace("\n", " ").strip()
+    eslesme = re.search(r"([A-ZÇĞİÖŞÜ\s]+ÜNİVERSİTESİ)", metin)
+    return eslesme.group(1).strip() if eslesme else None
+
+df_lisans["Üniversite"] = df_lisans[sutun].apply(universite_ayikla)
+df_lisans = df_lisans[df_lisans["Üniversite"].notna()]
+df_lisans["Üniversite Kısa"] = df_lisans["Üniversite"].str.title()
+
+top20 = df_lisans["Üniversite Kısa"].value_counts().head(20)
+
+plt.figure(figsize=(20, 10), facecolor="white")
+ax = plt.gca()
+ax.set_facecolor("white")
+
+bars = plt.bar(
+    top20.index,
+    top20.values,
+    color="#DDA0DD",
+    edgecolor="black",
+    linewidth=1.5
+)
+
+plt.title(
+    "Akademisyenlerin Lisans Mezuniyetine Göre En Çok Mezun Olduğu 20 Üniversite",
+    fontsize=26,
+    color="black",
+    fontweight="bold",
+    pad=25
+)
+
+plt.xlabel("Üniversiteler", fontsize=16, color="black")
+plt.ylabel("Akademisyen Sayısı", fontsize=16, color="black")
+
+plt.xticks(rotation=90, fontsize=12, color="black")
+plt.yticks(fontsize=12, color="black")
+plt.grid(axis="y", color="gray", alpha=0.30)
+
+for spine in ax.spines.values():
+    spine.set_color("black")
+
+plt.ylim(0, max(top20.values) + 45)
+
+for bar, uni in zip(bars, top20.index):
+    height = bar.get_height()
+    x = bar.get_x() + bar.get_width() / 2
+
+    plt.text(
+        x,
+        height + 2,
+        str(int(height)),
+        ha="center",
+        va="bottom",
+        fontsize=13,
+        color="black",
+        fontweight="bold"
+    )
